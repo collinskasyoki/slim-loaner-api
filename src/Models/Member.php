@@ -9,12 +9,13 @@ use Illuminate\Database\Eloquent\Model;
 class Member extends Model
 {
     use Notifiable;
-    use SearchableTrait;
+    // use SearchableTrait;
 
 
     //protected $table = '';
     protected $dates = ['deleted_at'];
 
+    /**
     protected $searchable = [
         'columns' => [
             'members.name'=>2,
@@ -33,6 +34,7 @@ class Member extends Model
             'guarants' => ['members.id', 'guarants.member_id'],
         ],
     ];
+    **/
 
     /**
      * The attributes that are mass assignable.

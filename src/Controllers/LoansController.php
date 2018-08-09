@@ -2,7 +2,7 @@
 use Slim\Http\Request;
 use Slim\Http\Response;
 
-class TestController {
+class LoansController {
   protected $container;
 
   public function __construct (ContainerInterface $container) {

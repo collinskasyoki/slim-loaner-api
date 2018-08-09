@@ -15,4 +15,6 @@ $app->get('/', function (Request $request, Response $response, array $args) {
 
 $app->group('/api/v1', function () {
   $this->get('/test', '\TestController::index');
+
+  $this->get('/members', '\MembersController::index');
 });
