@@ -19,5 +19,12 @@ $app->group('/api/v1', function () {
   // members routes
   $this->get('/members', '\MembersController::index');
   $this->get('/members/{id}', 'MembersController:getMember');
-  $this->post('/members', 'MembersController:store')->add($this->getContainer()->get('memberValidation'));
+
+  $this->post('/members', 'MembersController:store')->add(
+          $this->getContainer()['memberValidation']
+      );
+
+  $this->patch('/members/{id}', 'MembersController:update')->add(
+          $this->getContainer()['memberValidation']
+      );
 });

@@ -8,7 +8,6 @@ class MembersController {
   protected $container;
   protected $memberValidation;
 
-  //public function __construct (\DavidePastore\Slim\Validation\Validation $validation) {
   public function __construct (Slim\Container $container) {
     $this->memberValidation = $container->get('memberValidation');
   }
@@ -80,25 +79,24 @@ class MembersController {
   * @return Slim\Http\Response
   */
   public function store (Request $request, Response $response, array $args) {
-    $input = $request->getParsedBody();
-    if($input === null) {
-      return $response->withJson(
-        ['error_decoding_json' => json_last_error_msg()],
-        400,
-        JSON_PRETTY_PRINT
-      );
-    }
 
-    var_dump($input); exit;
-    //return $request->getParsedBody();
-      //return $request->getAttribute('errors');
+     //Check Validation
      if($this->memberValidation->hasErrors()) {
-      //if(true) {
-        //return "Error";
-       return $response->withJson($this->memberValidation->getErrors());
+       return $response->withJson($this->memberValidation->getErrors(), 403);
      }
      else {
-       return $response->withJson("All is well");
+       $data = $request->getParsedBody();
+
+       // Check existing conflicts?
+       // None allowed duplicates ['id_no', 'email']
+       $similarIdNumber = Member::where('id_no', $data['id_no'])->get()->toArray();
+       if(!empty($similarIdNumber))
+         return $response->withJson(["The ID Number Already Exists."], 403);
+
+       // All is well
+       // Add data to db
+       $member = Member::create($data);
+       return $response->withJson($member, 200);
      }
   }
 
@@ -112,7 +110,30 @@ class MembersController {
   * @return Slim\Http\Response
   */
   public function update (Request $request, Response $response, array $args) {
+    //Check Validation
+    if($this->memberValidation->hasErrors()) {
+      return $response->withJson($this->memberValidation->getErrors(), 403);
+    }
+    else {
+      try {
+        $member = Member::findOrFail($args['id']);
+        
+        $data = $request->getParsedBody();
 
+        if(strlen($data['phone'])==10)
+            $data['phone'] = '+254'.substr($data['phone'], 1);
+        if(strlen($data['next_kin_phone'])==10)
+            $data['next_kin_phone']='+254'.substr($data['next_kin_phone'], 1);
+
+        $member->update($data);
+        $member->save();
+
+        return $response->withJson($member, 200);
+      }
+      catch (ModelNotFoundException $e) {
+        return $response->withJson('Member not found', 404);
+      }
+    }
   }
 
   /**
