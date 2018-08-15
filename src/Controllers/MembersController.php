@@ -2,7 +2,6 @@
 use Slim\Http\Request;
 use Slim\Http\Response;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Respect\Validation\Validator as v;
 
 class MembersController {
   protected $container;

@@ -31,7 +31,7 @@ $container['membersController'] = function ($c) {
   return new MembersController($c->memberValidation);//$c->memberValidation);
 };
 
-// Validations
+// Member Module Validations
 $container ['memberValidation'] = function () {
   $nameValidator = v::stringType()->notBlank()->length(null, 500)
     ->setTemplate('Please Enter a Valid Name');
