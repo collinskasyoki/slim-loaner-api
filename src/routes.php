@@ -16,5 +16,8 @@ $app->get('/', function (Request $request, Response $response, array $args) {
 $app->group('/api/v1', function () {
   $this->get('/test', '\TestController::index');
 
+  // members routes
   $this->get('/members', '\MembersController::index');
+  $this->get('/members/{id}', 'MembersController:getMember');
+  $this->post('/members', 'MembersController:store')->add($this->getContainer()->get('memberValidation'));
 });

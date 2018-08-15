@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Member extends Model
 {
-    use Notifiable;
+    // use Notifiable;
     // use SearchableTrait;
 
 

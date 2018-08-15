@@ -1,5 +1,6 @@
 <?php
 use Illuminate\Database\Capsule\Manager as Capsule;
+use Respect\Validation\Validator as v;
 
 // DIC configuration
 
@@ -25,3 +26,16 @@ $capsule = new Capsule;
 $capsule->addConnection($container['settings']['db']);
 $capsule->setAsGlobal();
 $capsule->bootEloquent();
+
+// Validations
+$container ['memberValidation'] = function () {
+  $nameValidator = v::stringType()->notBlank()->max(500);
+  $idNumberValidator = v::numeric()->notBlank();
+
+  $validators = [
+    'name' => $nameValidator,
+    'id_no'=> $idNumberValidator
+  ];
+
+  return new \DavidePastore\Slim\Validation\Validation($validators);
+};
