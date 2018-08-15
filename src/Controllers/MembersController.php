@@ -79,6 +79,15 @@ class MembersController {
   * @return Slim\Http\Response
   */
   public function store (Request $request, Response $response, array $args) {
+    // Heads up incase of invalid JSON
+    $input = $request->getParsedBody(); 
+      if($input === null) { 
+        return $response->withJson( 
+          ['error_decoding_json' => 'It seems the JSON provided is invalid'], 
+          400, 
+          JSON_PRETTY_PRINT 
+        ); 
+      }
 
      //Check Validation
      if($this->memberValidation->hasErrors()) {
@@ -110,6 +119,16 @@ class MembersController {
   * @return Slim\Http\Response
   */
   public function update (Request $request, Response $response, array $args) {
+    // Heads up incase of invalid JSON
+    $input = $request->getParsedBody(); 
+      if($input === null) { 
+        return $response->withJson( 
+          ['error_decoding_json' => 'It seems the JSON provided is invalid'], 
+          400, 
+          JSON_PRETTY_PRINT 
+        ); 
+      }
+      
     //Check Validation
     if($this->memberValidation->hasErrors()) {
       return $response->withJson($this->memberValidation->getErrors(), 403);
