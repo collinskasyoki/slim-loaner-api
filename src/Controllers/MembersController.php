@@ -96,7 +96,7 @@ class MembersController {
        $data = $request->getParsedBody();
 
        // Check existing conflicts?
-       // None allowed duplicates ['id_no', 'email']
+       // Not allowed duplicates ['id_no', 'email']
        $similarIdNumber = Member::where('id_no', $data['id_no'])->get()->toArray();
        if(!empty($similarIdNumber))
          return $response->withJson(["The ID Number Already Exists."], 403);
