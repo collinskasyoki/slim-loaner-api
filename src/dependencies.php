@@ -63,3 +63,19 @@ $container ['memberValidation'] = function () {
   return new \DavidePastore\Slim\Validation\Validation($validators);
 };
 
+// Share module validation
+$container['sharesValidation'] = function ($c) {
+  $idValidator = v::numeric()->notBlank();
+  $amountValidator = v::numeric()->notBlank()
+    ->setTemplate('Please Enter a Valid Amount');
+  $dateValidator = v::date()->notBlank()
+    ->setTemplate('Please Enter a Valid Date');
+
+  $validators = [
+    'member_id' => $idValidator,
+    'amount' => $amountValidator,
+    'date_received' => $dateValidator
+  ];
+
+  return new \DavidePastore\Slim\Validation\Validation($validators);
+};
