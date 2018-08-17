@@ -101,6 +101,15 @@ class MembersController {
        if(!empty($similarIdNumber))
          return $response->withJson(["The ID Number Already Exists."], 403);
 
+       // Kenyan phone numbers are circulated without the country code
+       // and prepended with a zero
+       // Append the country code +254 to the phone number
+       // The preceding zero should already be scrapped off
+       if(strlen($data['phone'])==9)
+           $data['phone'] = '+254'.substr($data['phone'], 0);
+       if(strlen($data['next_kin_phone'])==9)
+           $data['next_kin_phone']='+254'.substr($data['next_kin_phone'], 0);
+
        // All is well
        // Add data to db
        $member = Member::create($data);
@@ -138,10 +147,14 @@ class MembersController {
         
         $data = $request->getParsedBody();
 
-        if(strlen($data['phone'])==10)
-            $data['phone'] = '+254'.substr($data['phone'], 1);
-        if(strlen($data['next_kin_phone'])==10)
-            $data['next_kin_phone']='+254'.substr($data['next_kin_phone'], 1);
+        // Kenyan phone numbers are circulated without the country code
+        // and prepended with a zero
+        // Append the country code +254 to the phone number
+        // The preceding zero should already be scrapped off
+        if(strlen($data['phone'])==9)
+            $data['phone'] = '+254'.substr($data['phone'], 0);
+        if(strlen($data['next_kin_phone'])==9)
+            $data['next_kin_phone']='+254'.substr($data['next_kin_phone'], 0);
 
         $member->update($data);
         $member->save();
