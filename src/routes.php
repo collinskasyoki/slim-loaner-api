@@ -37,4 +37,13 @@ $app->group('/api/v1', function () {
   $this->patch('/shares/{id}', 'SharesController:update')->add(
           $this->getContainer()['sharesValidation']
   );
+
+  // Settings route
+  $this->get('/settings', 'SettingsController:index');
+  $this->post('/settings', 'SettingsController:store')->add(
+          $this->getContainer()['settingsValidator']
+  );
+  $this->patch('/settings/{id}', 'SettingsController:update')->add(
+          $this->getContainer()['settingsValidator']
+  );
 });

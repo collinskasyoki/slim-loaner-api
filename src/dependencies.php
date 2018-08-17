@@ -79,3 +79,29 @@ $container['sharesValidation'] = function ($c) {
 
   return new \DavidePastore\Slim\Validation\Validation($validators);
 };
+
+// Settings Module Validations
+$container['settingsValidator'] = function($c) {
+  $nameValidator = v::stringType()->notBlank();
+  // $shareValueValidator = v::numeric()->notBlank();
+  $loanDurationValidator = v::numeric()->notBlank();
+  $loanInterestValidator = v::numeric()->length(null, 100)->notBlank();
+  $loanBorrowableValidator = v::numeric()->notBlank();
+  $minimumGuarantorsValidator = v::numeric()->notBlank();
+  $retentionFeeValidator = v::numeric()->length(null, 100)->notBlank();
+  $notificationsValidator = v::boolVal();
+  $notificationNumber = v::numeric()->notBlank();
+
+  $validators = [
+    'name' => $nameValidator,
+    // 'share_value' => $shareValueValidator,
+    'loan_duration' => $loanDurationValidator,
+    'loan_interest' => $loanInterestValidator,
+    'loan_borrowable' => $loanBorrowableValidator,
+    'min_guarantors' => $minimumGuarantorsValidator,
+    'retention_fee' => $retentionFeeValidator,
+    'notifications' => $notificationsValidator,
+    'notification_number' => $notificationNumber
+  ];
+  return new \DavidePastore\Slim\Validation\Validation($validators);
+};
