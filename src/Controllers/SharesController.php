@@ -46,6 +46,25 @@ class SharesController {
   }
 
   /**
+  * Get a single share history
+  *
+  * @param Slim\Htt\Request $request
+  * @param Slim\Http\Response $response
+  * @param array $args
+  *
+  * @return Slim\Http\Response
+  */
+  public function getShare(Request $request, Response $response, array $args) {
+    try {
+      $share = Share::findOrFail($args['id']);
+
+      return $response->withJson($share);
+    } catch (ModelNotFoundException $e) {
+      return $response->withJson('Share not found', 404);
+    }
+  }
+
+  /**
   * Store the specified resource in storage
   *
   * @param Slim\Http\Request $request

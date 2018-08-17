@@ -26,8 +26,11 @@ $app->group('/api/v1', function () {
           $this->getContainer()['memberValidation']
       );
 
+  // Shares routes
+  $this->get('/members/{id}/shares', 'SharesController:getMemberShares');
+
   $this->get('/shares', 'SharesController:index');
-  $this->get('/shares/{id}', 'SharesController:getMemberShares');
+  $this->get('/shares/{id}', 'SharesController:getShare');
   $this->post('/shares', 'SharesController:store')->add(
           $this->getContainer()['sharesValidation']
       );
