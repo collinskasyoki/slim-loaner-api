@@ -105,3 +105,20 @@ $container['settingsValidator'] = function($c) {
   ];
   return new \DavidePastore\Slim\Validation\Validation($validators);
 };
+
+// Loan Module validator
+$container['loansValidator'] = function($c) {
+
+  $memberIdValidator = v::numeric()->notBlank();
+  $amountValidator = v::numeric()->notBlank();
+  $dateValidator = v::date()->notBlank();
+  $guarantorsValidator = v::arrayVal()->notBlank();
+
+  $validators = [
+    'member_id' => $memberIdValidator,
+    'amount' => $amountValidator,
+    'date_given' => $dateValidator,
+    'guarantors' => $guarantorsValidator,
+  ];
+  return new \DavidePastore\Slim\Validation\Validation($validators);
+};
