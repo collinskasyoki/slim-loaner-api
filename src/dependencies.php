@@ -120,7 +120,7 @@ $container['loansValidator'] = function($c) {
     'amount' => $amountValidator,
     'date_given' => $dateValidator,
     'guarantors' => $guarantorsValidator,
-    'guarantors_amount' => $guarantorsAmountValidator
+    'guarantors_amounts' => $guarantorsAmountValidator
   ];
   return new \DavidePastore\Slim\Validation\Validation($validators);
 };
