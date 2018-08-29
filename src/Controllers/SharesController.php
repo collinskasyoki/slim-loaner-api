@@ -88,12 +88,10 @@ class SharesController {
       if($this->sharesValidation->hasErrors()) {
         return $response->withJson($this->sharesValidation->getErrors(), 403);
       } else {
-        $data = $request->getParsedBody();
-
         try {
-          $payee = Member::findOrFail($data['member_id']);
-          $data['paid_by_id'] = $data['member_id'];
-          $data['paid_by'] = $payee->name;
+          $payee = Member::findOrFail($input['member_id']);
+          $input['paid_by_id'] = $input['member_id'];
+          $input['paid_by'] = $payee->name;
         } catch(ModelNotFoundException $e) {
           return $response
             ->withJson(
@@ -102,7 +100,7 @@ class SharesController {
             );
         }
 
-        $shares = Share::create($data);
+        $shares = Share::create($input);
         return $response->withJson($shares, 200);
       }
   }
@@ -134,12 +132,11 @@ class SharesController {
       else {
         try {
           $shares = Share::findOrFail($args['id']);
-          
-          $data = $request->getParsedBody();
+
           try {
-            $payee = Member::findOrFail($data['member_id']);
-            $data['paid_by_id'] = $data['member_id'];
-            $data['paid_by'] = $payee->name;
+            $payee = Member::findOrFail($input['member_id']);
+            $input['paid_by_id'] = $input['member_id'];
+            $input['paid_by'] = $payee->name;
           } catch(ModelNotFoundException $e) {
             return $response
               ->withJson(
@@ -148,7 +145,7 @@ class SharesController {
               );
           }
 
-          $shares->update($data);
+          $shares->update($input);
           $shares->save();
 
           return $response->withJson($shares, 200);

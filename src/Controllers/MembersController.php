@@ -93,11 +93,9 @@ class MembersController {
        return $response->withJson($this->memberValidation->getErrors(), 403);
      }
      else {
-       $data = $request->getParsedBody();
-
        // Check existing conflicts?
        // Not allowed duplicates ['id_no', 'email']
-       $similarIdNumber = Member::where('id_no', $data['id_no'])->get()->toArray();
+       $similarIdNumber = Member::where('id_no', $input['id_no'])->get()->toArray();
        if(!empty($similarIdNumber))
          return $response->withJson(["The ID Number Already Exists."], 403);
 
@@ -105,14 +103,14 @@ class MembersController {
        // and prepended with a zero
        // Append the country code +254 to the phone number
        // The preceding zero should already be scrapped off
-       if(strlen($data['phone'])==9)
-           $data['phone'] = '+254'.substr($data['phone'], 0);
-       if(strlen($data['next_kin_phone'])==9)
-           $data['next_kin_phone']='+254'.substr($data['next_kin_phone'], 0);
+       if(strlen($input['phone'])==9)
+           $input['phone'] = '+254'.substr($input['phone'], 0);
+       if(strlen($input['next_kin_phone'])==9)
+           $input['next_kin_phone']='+254'.substr($input['next_kin_phone'], 0);
 
        // All is well
        // Add data to db
-       $member = Member::create($data);
+       $member = Member::create($input);
        return $response->withJson($member, 200);
      }
   }
@@ -144,19 +142,17 @@ class MembersController {
     else {
       try {
         $member = Member::findOrFail($args['id']);
-        
-        $data = $request->getParsedBody();
 
         // Kenyan phone numbers are circulated without the country code
         // and prepended with a zero
         // Append the country code +254 to the phone number
         // The preceding zero should already be scrapped off
-        if(strlen($data['phone'])==9)
-            $data['phone'] = '+254'.substr($data['phone'], 0);
-        if(strlen($data['next_kin_phone'])==9)
-            $data['next_kin_phone']='+254'.substr($data['next_kin_phone'], 0);
+        if(strlen($input['phone'])==9)
+            $input['phone'] = '+254'.substr($input['phone'], 0);
+        if(strlen($input['next_kin_phone'])==9)
+            $input['next_kin_phone']='+254'.substr($input['next_kin_phone'], 0);
 
-        $member->update($data);
+        $member->update($input);
         $member->save();
 
         return $response->withJson($member, 200);

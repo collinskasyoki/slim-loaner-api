@@ -113,12 +113,14 @@ $container['loansValidator'] = function($c) {
   $amountValidator = v::numeric()->notBlank();
   $dateValidator = v::date()->notBlank();
   $guarantorsValidator = v::arrayVal()->notBlank();
+  $guarantorsAmountValidator = v::notBlank();
 
   $validators = [
     'member_id' => $memberIdValidator,
     'amount' => $amountValidator,
     'date_given' => $dateValidator,
     'guarantors' => $guarantorsValidator,
+    'guarantors_amount' => $guarantorsAmountValidator
   ];
   return new \DavidePastore\Slim\Validation\Validation($validators);
 };

@@ -52,12 +52,10 @@ class SettingsController {
        if($this->settingsValidator->hasErrors()) {
          return $response->withJson($this->settingsValidator->getErrors(), 403);
        } else {
-         $data = $request->getParsedBody();
+         if(strlen($input['notification_number'])==9)
+             $input['notification_number'] = '+254'.substr($input['notification_number'], 0);
 
-         if(strlen($data['notification_number'])==9)
-             $data['notification_number'] = '+254'.substr($data['notification_number'], 0);
-
-         $settings = Setting::create($data);
+         $settings = Setting::create($input);
 
          return $response->withJson($settings);
        }
@@ -89,16 +87,14 @@ class SettingsController {
         try {
           $setting = Setting::findOrFail($args['id']);
 
-          $data = $request->getParsedBody();
-
           // Kenyan phone numbers are circulated without the country code
           // and prepended with a zero
           // Append the country code +254 to the phone number
           // The preceding zero should already be scrapped off
-          if(strlen($data['notification_number'])==9)
-              $data['notification_number'] = '+254'.substr($data['notification_number'], 0);
+          if(strlen($input['notification_number'])==9)
+              $input['notification_number'] = '+254'.substr($input['notification_number'], 0);
 
-          $setting->update($data);
+          $setting->update($input);
           $setting->save();
 
           return $response->withJson($setting);
