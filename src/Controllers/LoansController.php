@@ -8,7 +8,7 @@ class LoansController {
   protected $loansValidator;
 
   public function __construct (Slim\Container $container) {
-    // $this->container = $container;
+    $this->container = $container;
 
     $this->loansValidator = $container->get('loansValidator');
   }
@@ -297,7 +297,184 @@ class LoansController {
     }
   }
 
-  public function pay_loan(){
+  public function pay_loan(Request $request, Response $response, array $args) {
+    // Heads up incase of invalid JSON
+    $input = $request->getParsedBody(); 
+    if($input === null) { 
+      return $response->withJson( 
+        ['error_decoding_json' => 'It seems the JSON provided is invalid'], 
+        400, 
+        JSON_PRETTY_PRINT 
+      ); 
+    }
 
+    // Check validation
+    if($this->container->payValidator->hasErrors()) {
+      return $response->withJson($this->loansValidator->getErrors(), 403);
+    }
+    else {
+      try {
+        $loan = Loan::findOrFail($args['id']);
+
+        if($loan->paid_full) {
+          return $response->withJson('Loan Fully Paid', 200);
+        }
+
+        $loanee = $loan->member()->first();
+
+        $date = Carbon\Carbon::parse($input['date_given']);
+        $input['received_date'] = $date->toDateString();
+
+        unset($input['date_given']);
+        $amount_rem = $loan->amount_payable -= $input['amount'];
+
+        //Send notification
+        //
+
+        $payment = Payment::create($input);
+        $loan->update(['amount_payable' => $amount_rem]);
+
+        if($amount_rem <= 0) {
+          $tempamount = $loan->amount_payable;
+                      $loan->update([
+                        'paid_full'=>true,
+                        'amount_payable'=>0]);
+                      $loan->save();
+                      $loan->amount_payable = $tempamount;
+
+                      //$message = "Dear Member. Your loan of Ksh ".$loan->amount." has been fully repaid.";
+        }
+//
+
+        $releases = [];
+
+        $theguarants = $loan->guarants()->get();
+        $totalalienguarants = 0;
+
+        foreach($theguarants as $guarantindex=>$eachguarant){
+            $releases[$eachguarant->member_id]['amount'] = 0;
+
+            if($eachguarant->member_id!=$loan->member_id)
+                $totalalienguarants += $eachguarant->amount;
+        }
+
+        if($totalalienguarants>0){
+            foreach($theguarants as $guarantindex=>$eachguarant) {
+                if($eachguarant->member_id==$loan->member_id) {
+                  $releases[$loan->member_id]['guarant_id'] = $eachguarant->id;
+                    continue;
+                 }
+
+                $theguarantor = $eachguarant->member()->first();
+                //his/her percentage
+                $guarant_percentage = $eachguarant->amount/$totalalienguarants;
+                $release_amount = $guarant_percentage * $payment->amount;
+
+                if($release_amount > $eachguarant->to_release){
+                    $releases[$theguarantor->id]['amount'] += $eachguarant->to_release;
+                    $releases[$theguarantor->id]['guarant_id'] = $eachguarant->id;
+                    $releases[$loan->member_id]['amount'] += ($release_amount-$eachguarant->to_release);
+                    $releases[$theguarantor->id]['release_retention'] = 1;
+                }else{
+                    $releases[$theguarantor->id]['amount'] += $guarant_percentage*$payment->amount;
+                    $releases[$theguarantor->id]['guarant_id'] = $eachguarant->id;
+                }
+            }
+
+        } else {
+            $releases[$loan->member_id]['guarant_id'] = $theguarants->first()->id;
+            $releases[$loan->member_id]['amount'] = $payment->amount;
+        }
+
+            if($loan->paid_full){
+                $thepayments = $loan->payments()->get();
+                $allpayments = 0;
+                foreach($thepayments as $eachpayment){
+                    $allpayments += $eachpayment->amount;
+                }
+
+
+                $loanee->shares_held -= ($loan->retention_fee - (($allpayments-$loan->amount)-$loan->amount_payable));
+                $loanee->save();
+            }
+
+            foreach($releases as $m_id=>$eachrelease){
+                $owner = new Member;
+                $owner = Member::find($m_id);
+
+                $owner->shares_held -= $eachrelease['amount'];
+                //if($owner->shares_held<0)$owner->shares_held=0;
+                $owner->save();
+
+                $theguarant = New Guarant;
+                $theguarant = Guarant::find($eachrelease['guarant_id']);
+                $theguarant->to_release -= $eachrelease['amount'];
+            
+
+                if($theguarant->to_release < 0)$theguarant->to_release=0;
+                $theguarant->save();
+                if($theguarant->to_release==0){
+                    $owner->shares_held -= $theguarant->retention_fee;
+                    $theguarant->retention_fee=0;
+                    $theguarant->save();
+                    $owner->save();
+                }
+            }
+
+            /*
+            //after payments and releases
+            //check if amount paid is lower limit
+            $payments = $loan->payments()->get();
+
+            $today = \Carbon\Carbon::now();
+            $today_string = $today->toDateString();
+            $loan_taken_date = \Carbon\Carbon::parse($loan->date_given);
+            $loan_due_date = \Carbon\Carbon::parse($loan->date_due);
+            $extremedue = \Carbon\Carbon::parse($loan->extreme_due);
+
+            //check this month's payments
+            $this_month_payments = [];
+            foreach($payments as $each_payment){
+                $today_exploded = explode('-', $today_string);
+                $payment_date_exploded = explode('-', $payment->received_date);
+
+                if($today_exploded[1]==$payment_date_exploded[1])
+                    $this_month_payments[] = $each_payment;
+            }
+            */
+
+            //add this month's payments
+            //$this_month_sum = 0;
+            //foreach($this_month_payments as $each_payment)
+            //    $this_month_sum += $each_payment->amount;
+            
+            //amount supposed to pay this month
+            //$installment = $loan->amount_payable / ($today->diffInMonths($extremedue));
+
+            //if paid as supposed to
+            //recalculate amount to pay next
+            //add months
+            //if($this_month_sum>=$installment){
+                
+            //}
+
+        /*
+        if($this->settings->notifications){
+            \App\NotifySend::create(['messageto'=>$loanee->phone, 'messagefrom'=>$this->settings->notification_number, 'message'=>$message, 'member_id'=>$loanee->id]);
+        }
+        */
+            return $response->withJson(
+              ['loan'=>$loan, 
+               'payment'=>$payment
+              ],
+              200);
+
+            //
+
+      }
+      catch (ModelNotFoundException $e) {
+        return $response->withJson('The loan cannot be found', 404);
+      }
+    }
   }
 }

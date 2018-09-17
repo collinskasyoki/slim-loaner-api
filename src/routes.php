@@ -42,6 +42,9 @@ $app->group('/api/v1', function () {
   $this->get('/loans', 'LoansController:index');
   $this->get('/loans/{id}/guarantors', 'LoansController:showLoanGuarantors');
   $this->get('/loans/{id}/payments', 'LoansController:showLoanPayments');
+  $this->post('/loans/{id}/pay', 'LoansController:pay_loan')->add(
+    $this->getContainer()['payValidator']
+  );
   $this->post('/loans', 'LoansController:store')->add(
            $this->getContainer()['loansValidator']
   );

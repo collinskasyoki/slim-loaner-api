@@ -124,3 +124,15 @@ $container['loansValidator'] = function($c) {
   ];
   return new \DavidePastore\Slim\Validation\Validation($validators);
 };
+
+// Loan Pay validator
+$container['payValidator'] = function ($c) {
+  $amountValidator = v::numeric()->notBlank();
+  $date_given = v::date()->notBlank();
+
+  $validators = [
+    'amount' => $amountValidator,
+    'date_given' => $date_given
+  ];
+  return new \DavidePastore\Slim\Validation\Validation($validators);
+};
