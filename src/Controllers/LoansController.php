@@ -109,6 +109,7 @@ class LoansController {
       }
 
         $info['loan'] = $loan;
+        $info['loan']['owner'] = $loan->member()->first()->toArray();
 
         return $response->withJson($info);
     }
@@ -203,10 +204,10 @@ class LoansController {
                 $theguarantor->shares_held += $each_guarant->amount;
               }
               else{
-                  $guarantors_retention = ($theguarantor->shares-$theguarantor->shares_held)*($settings->retention_fee/100);
-                  $each_guarant->retention_fee = $guarantors_retention;
-                  $each_guarant->save();
-                  $theguarantor->shares_held += $each_guarant->amount + $guarantors_retention;
+                  // $guarantors_retention = ($theguarantor->shares-$theguarantor->shares_held)*($settings->retention_fee/100);
+                  // $each_guarant->retention_fee = $guarantors_retention;
+                  // $each_guarant->save();
+                  $theguarantor->shares_held += $each_guarant->amount; // + $guarantors_retention;
               }
               
               $theguarantor->save();
