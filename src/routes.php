@@ -45,6 +45,7 @@ $app->group('/api/v1', function () {
   $this->post('/loans', 'LoansController:store')->add(
            $this->getContainer()['loansValidator']
   );
+  $this->delete('/loans/{id}', 'LoansController:destroy');
 
   // Settings route
   $this->get('/settings', 'SettingsController:index');

@@ -11,9 +11,6 @@ class LoansController {
     // $this->container = $container;
 
     $this->loansValidator = $container->get('loansValidator');
-    {
-      $this->foo = $foo;
-    }
   }
 
   /**
@@ -252,7 +249,52 @@ class LoansController {
   * @return Slim\Http\Response
   */
   public function destroy (Request $request, Response $response, array $args) {
+    try{
+      $loan = Loan::findOrFail($args['id']);
+      $guarants = $loan->guarants()->get();
+      $payments = $loan->payments()->get();
 
+      $amounts_to_release = [];
+
+      //delete payments
+      if(!empty($payments)) {
+        foreach($payments as $payment) {
+          $payment->delete();
+        }
+      }
+
+      //delete guarants
+      if(!empty($guarants)) {
+        foreach ($guarants as $guarant) {
+          $amounts_to_release[$guarant->member_id] += $guarant->to_release;
+          $guarant->delete();
+        }
+      }
+
+      //delete loan
+      if(!empty($loan)) {
+        $amounts_to_release[$loan->member_id] += $loan->retention_fee;
+        $loan->delete();
+      }
+
+      //Restore withheld shares
+      foreach( $amounts_to_release as $key => $amount ) {
+        $member = Member::find($key);
+        $member->shares_held -= $amount;
+
+        if($member->shares_held < 0) {
+          $members->shares_held = 0;
+        }
+
+        $member->save();
+      }
+
+      return $response->withJson('Success', 200);
+
+    }
+    catch(ModelNotFoundException $e) {
+      return $response->withJson('The loan cannot be found', 404);
+    }
   }
 
   public function pay_loan(){
