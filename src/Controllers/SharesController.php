@@ -22,7 +22,13 @@ class SharesController {
   * @return Slim\Http\Response
   */
   public function index (Request $request, Response $response, array $args) {
-    return $response->withJson(['shares' => Share::all()]);
+    $shares = Share::all();
+    foreach($shares as $share) {
+      $member_info = $share->member()->first();
+      $share['name'] = $member_info->name;
+      $share['id_no'] = $member_info->id_no;
+    }
+    return $response->withJson(['shares' => $shares]);
   }
 
   /**
