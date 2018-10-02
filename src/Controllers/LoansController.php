@@ -23,7 +23,11 @@ class LoansController {
   * @return Slim\Http\Response
   */
   public function index (Request $request, Response $response, array $args) {
-    return $response->withJson(['loans' => Loan::orderBy('date_given', 'DESC')->get()]);
+    $loans = Loan::orderBy('date_given', 'DESC')->get();
+    foreach ($loans as $loan) {
+      $loan->member_info = $loan->member()->first();
+    }
+    return $response->withJson(['loans' => $loans]);
   }
 
   /**
